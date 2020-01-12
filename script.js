@@ -45,7 +45,7 @@ const Scene = {
         vars.scene.add(light);
 
         // Création du sol
-        let sol = new THREE.Mesh(new THREE.PlaneBufferGeometry(2000, 2000), new THREE.MeshLambertMaterial({ color: new THREE.Color(0x888888), map: new THREE.TextureLoader().load('./texture/grass.jpg') }));
+        let sol = new THREE.Mesh(new THREE.PlaneBufferGeometry(2000, 2000), new THREE.MeshLambertMaterial({ color: new THREE.Color(0x888888), map: new THREE.TextureLoader().load('./texture/wood.jpg') }));
         sol.rotation.x = -Math.PI / 2;
         sol.receiveShadow = false;
         vars.scene.add(sol); 
@@ -78,6 +78,47 @@ const Scene = {
         vars.controls.maxDistance = 3000;
        //vars.controls.autoRotate = true;
 
+        //Chargement des objets
+        Scene.loadFBX("./models/lamp.FBX", 1, [45,22, 0], [0, 0, 0], 0xFFFF00, "lamp", () => {
+            Scene.loadFBX("./models/mug.FBX", 1, [45,22, 0], [0, 0, 0], 0xFFFF00, "mug", () => {
+                Scene.loadFBX("./models/pen.FBX", 1, [90,22, 0], [0, 0, 0], 0xFFFF00, "pen1", () => {
+                    //Clonage
+                    let pen2 = Scene.vars.pen1.clone();
+                    pen2.position.x = -45;
+                    pen2.position.y = 22;
+                    Scene.vars.pen2 = pen2;
+                    
+                    let pen3 = Scene.vars.pen2.clone();
+                    pen3.position.x = 45;
+                    pen3.position.y = 22;
+                    Scene.vars.pen3 = pen3;
+
+                    //PEN CUP
+                    let penCup = new THREE.Group();
+                    penCup.add(Scene.vars.mug);
+                    penCup.add(Scene.vars.pen1);
+                    penCup.add(pen2);
+                    penCup.add(pen3);
+                    vars.scene.add(penCup);
+        
+                    penCup.position.z = 0;
+                    penCup.position.y = 0;
+                    Scene.vars.penCupGroup = penCup;
+
+                    //LAMP
+                    let lampDesk = new THREE.Group();
+                    lampDesk.add(Scene.vars.lamp);
+                    vars.scene.add(lampDesk);
+                    
+                    lampDesk.position.z = 50;
+                    lampDesk.position.y = 50;
+                    Scene.vars.lampDeskGroup = lampDesk;
+                    
+                    console.log("== finish loading ==");
+                    document.querySelector('#loading').remove();
+                });
+            });
+        });
 
     },
     onWindowResize: () => {
@@ -94,6 +135,26 @@ const Scene = {
     animate: () => {
         requestAnimationFrame(Scene.animate);
         Scene.render();
+    },
+    loadFBX: (file, scale, position, rotation, color, name, callback) => {
+        let loader = new FBXLoader();
+
+        loader.load(file, (model) => {
+            model.traverse(node => {
+                if(node.isMesh) {
+                    node.material.color = new THREE.Color(color);
+                }
+            });
+
+            model.position.set(position[0], position[1], position[2]);
+            model.rotation.set(rotation[0], rotation[1], rotation[2]);
+            model.color = color;
+            model.scale.set(scale, scale, scale);
+            model.name = name;
+            Scene.vars[name] = model;
+            callback();
+
+        });
     }
 };
 
