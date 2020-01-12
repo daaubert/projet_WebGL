@@ -68,8 +68,8 @@ const Scene = {
         vars.controls.target.set(0, 100, 0);
         vars.controls.enablePan = false;
 
-        vars.controls.minPolarAngle = -Math.PI / 2;
-        vars.controls.maxPolarAngle = Math.PI / 2;
+        // vars.controls.minPolarAngle = -Math.PI / 2;
+        // vars.controls.maxPolarAngle = Math.PI / 2;
         
         // vars.controls.maxAzimuthAngle = Math.PI / 4;
         // vars.controls.minAzimuthAngle = -Math.PI / 4;
@@ -78,19 +78,20 @@ const Scene = {
         vars.controls.maxDistance = 3000;
        //vars.controls.autoRotate = true;
 
+
         //Chargement des objets
-        Scene.loadFBX("./models/lamp.FBX", 1, [45,22, 0], [0, 0, 0], 0xFFFF00, "lamp", () => {
-            Scene.loadFBX("./models/mug.FBX", 1, [45,22, 0], [0, 0, 0], 0xFFFF00, "mug", () => {
-                Scene.loadFBX("./models/pen.FBX", 1, [90,22, 0], [0, 0, 0], 0xFFFF00, "pen1", () => {
+        Scene.loadFBX("./models/lamp.FBX", 1.5, [300, -50, -500], [0, 0, 0], 0xFFFF00, "lamp", () => {
+            Scene.loadFBX("./models/mug.FBX", 1.25, [-260, 2, -200], [0, 0, 0], 0xFFFF00, "mug", () => {
+                Scene.loadFBX("./models/pen.FBX", 1, [0, 250, 0], [Math.PI/2, 0, 0], 0xFFFF00, "pen1", () => {
                     //Clonage
                     let pen2 = Scene.vars.pen1.clone();
-                    pen2.position.x = -45;
-                    pen2.position.y = 22;
+                    pen2.position.x = -60;
+                    pen2.rotation.y = Math.PI/4;
                     Scene.vars.pen2 = pen2;
                     
-                    let pen3 = Scene.vars.pen2.clone();
-                    pen3.position.x = 45;
-                    pen3.position.y = 22;
+                    let pen3 = Scene.vars.pen1.clone();
+                    pen3.position.x = 60;
+                    pen3.rotation.y = -Math.PI/4;
                     Scene.vars.pen3 = pen3;
 
                     //PEN CUP
