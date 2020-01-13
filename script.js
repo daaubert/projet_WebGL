@@ -10,7 +10,8 @@ const Scene = {
         renderer: null,
         camera: null,
         stats: null,
-        controls: null
+        controls: null,
+        lightIntensity: null
     },
     init: () => {
         console.log("== init ==");
@@ -40,15 +41,66 @@ const Scene = {
         vars.camera.position.set(-1.5, 500, 500);
 
         // Création de la lumière
-        let light = new THREE.HemisphereLight(0xFFFFFF, 0x444444, 0.5);
-        light.position.set(0, 700, 0);
-        vars.scene.add(light);
+        let lightGlobal = new THREE.HemisphereLight(0xFFFFFF, 0x444444, 0.5);
+        lightGlobal.position.set(0, 700, 0);
+        vars.scene.add(lightGlobal);
+
+        let lightIntensity = 0.5;
+        let d = 1000;
+
+        let light = new THREE.DirectionalLight(0xFFFFFF, lightIntensity);
+        light.position.set(0, 800, 400); 
+        light.target.position.set(0, 0, 0);
+
+        light.castShadow = true;
+        light.shadow.camera.left = -d;
+        light.shadow.camera.right = d;
+        light.shadow.camera.bottom = -d;
+        light.shadow.camera.top = d;
+        light.shadow.camera.far = 2000;
+        light.shadow.mapSize.width = 4096;
+        light.shadow.mapSize.height = 4096;
+
+        //vars.scene.add(light);
+        //vars.scene.add(light.target);
+        let helper1 = new THREE.DirectionalLightHelper(light, 5);
+        vars.scene.add(helper1);
+
+        let lightLamp = new THREE.SpotLight(0xFFFFFF, 1, 0, Math.PI/4);
+        lightLamp.position.set(350, 700, -450);
+
+        lightLamp.castShadow = true;
+        lightLamp.shadow.camera.left = -d;
+        lightLamp.shadow.camera.right = d;
+        lightLamp.shadow.camera.bottom = -d;
+        lightLamp.shadow.camera.top = d;
+        lightLamp.shadow.camera.far = 2000;
+        lightLamp.shadow.mapSize.width = 4096;
+        lightLamp.shadow.mapSize.height = 4096;
+
+        vars.scene.add(lightLamp.target);
+        lightLamp.target.position.x = -10;
+        lightLamp.target.position.y = -10;
+        lightLamp.target.position.z = -10;
+        vars.scene.add(lightLamp);
+       
+       
+        let helperLamp = new THREE.SpotLightHelper(lightLamp, 5);
+        vars.scene.add(helperLamp);
+
 
         // Création du sol
         let sol = new THREE.Mesh(new THREE.PlaneBufferGeometry(2000, 2000), new THREE.MeshLambertMaterial({ color: new THREE.Color(0x888888), map: new THREE.TextureLoader().load('./texture/wood.jpg') }));
         sol.rotation.x = -Math.PI / 2;
         sol.receiveShadow = false;
         vars.scene.add(sol); 
+
+        let planeMaterial = new THREE.ShadowMaterial();
+        planeMaterial.opacity = 0.07;
+        let shadowPlane = new THREE.Mesh(new THREE.PlaneBufferGeometry(2000, 2000), planeMaterial);
+        shadowPlane.rotation.x = -Math.PI / 2;
+        shadowPlane.receiveShadow = true;
+        vars.scene.add(shadowPlane);
 
         // Grid helper
         let grid = new THREE.GridHelper(2000, 20, 0x000000, 0x000000);
@@ -80,7 +132,7 @@ const Scene = {
 
 
         //Chargement des objets
-        Scene.loadFBX("./models/lamp.FBX", 1.5, [300, -50, -500], [0, 0, 0], 0xFFFF00, "lamp", () => {
+        Scene.loadFBX("./models/lamp.FBX", 1.5, [500, -50, -700], [0, Math.PI/4, 0], 0xFFFF00, "lamp", () => {
             Scene.loadFBX("./models/mug.FBX", 1.25, [-260, 2, -200], [0, 0, 0], 0xFFFF00, "mug", () => {
                 Scene.loadFBX("./models/pen.FBX", 1, [0, 250, 0], [Math.PI/2, 0, 0], 0xFFFF00, "pen1", () => {
                     //Clonage
@@ -143,6 +195,9 @@ const Scene = {
         loader.load(file, (model) => {
             model.traverse(node => {
                 if(node.isMesh) {
+                    node.receiveShadow = true;
+                    node.castShadow = true;
+
                     node.material.color = new THREE.Color(color);
                 }
             });
