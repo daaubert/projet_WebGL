@@ -11,7 +11,9 @@ const Scene = {
         camera: null,
         stats: null,
         controls: null,
-        lightIntensity: null
+        lightIntensity: null,
+        mouse: new THREE.Vector2(),
+        raycaster: new THREE.Raycaster()
     },
     init: () => {
         console.log("== init ==");
@@ -45,7 +47,7 @@ const Scene = {
         lightGlobal.position.set(0, 700, 0);
         vars.scene.add(lightGlobal);
 
-        let lightIntensity = 0.5;
+        let lightIntensity = 1;
         let d = 1000;
 
         let light = new THREE.DirectionalLight(0xFFFFFF, lightIntensity);
@@ -64,9 +66,9 @@ const Scene = {
         //vars.scene.add(light);
         //vars.scene.add(light.target);
         let helper1 = new THREE.DirectionalLightHelper(light, 5);
-        vars.scene.add(helper1);
+        //vars.scene.add(helper1);
 
-        let lightLamp = new THREE.SpotLight(0xFFFFFF, 1, 0, Math.PI/4);
+        let lightLamp = new THREE.SpotLight(0xF0BB2C, 0, 0, Math.PI/4);
         lightLamp.position.set(350, 700, -450);
 
         lightLamp.castShadow = true;
@@ -79,14 +81,14 @@ const Scene = {
         lightLamp.shadow.mapSize.height = 4096;
 
         vars.scene.add(lightLamp.target);
-        lightLamp.target.position.x = -10;
-        lightLamp.target.position.y = -10;
+        lightLamp.target.position.x = 0;
+        lightLamp.target.position.y = 0;
         lightLamp.target.position.z = -10;
         vars.scene.add(lightLamp);
        
        
         let helperLamp = new THREE.SpotLightHelper(lightLamp, 5);
-        vars.scene.add(helperLamp);
+        //vars.scene.add(helperLamp);
 
 
         // Création du sol
@@ -132,46 +134,59 @@ const Scene = {
 
 
         //Chargement des objets
-        Scene.loadFBX("./models/lamp.FBX", 1.5, [500, -50, -700], [0, Math.PI/4, 0], 0xFFFF00, "lamp", () => {
-            Scene.loadFBX("./models/mug.FBX", 1.25, [-260, 2, -200], [0, 0, 0], 0xFFFF00, "mug", () => {
-                Scene.loadFBX("./models/pen.FBX", 1, [0, 250, 0], [Math.PI/2, 0, 0], 0xFFFF00, "pen1", () => {
-                    //Clonage
-                    let pen2 = Scene.vars.pen1.clone();
-                    pen2.position.x = -60;
-                    pen2.rotation.y = Math.PI/4;
-                    Scene.vars.pen2 = pen2;
-                    
-                    let pen3 = Scene.vars.pen1.clone();
-                    pen3.position.x = 60;
-                    pen3.rotation.y = -Math.PI/4;
-                    Scene.vars.pen3 = pen3;
+        Scene.loadFBX("./models/clipboard.FBX", 60, [0, 100, 700], [0, 0, 0], 0xFFFFFF, "notepad", () => {
+            Scene.loadFBX("./models/lamp/lamp.FBX", 1.5, [500, 0, -700], [0, Math.PI/4, 0], 0xFFFF00, "lamp", () => {
+                Scene.loadFBX("./models/mug.FBX", 1.25, [-260, 2, -200], [0, 0, 0], 0xFEB900, "mug", () => {
+                    Scene.loadFBX("./models/pen.FBX", 1, [0, 250, 0], [Math.PI/2, 0, 0], 0xFFFF00, "pen1", () => {
+                        //Clonage
+                        let pen2 = Scene.vars.pen1.clone();
+                        pen2.position.x = -60;
+                        pen2.rotation.y = Math.PI/4;
+                        Scene.vars.pen2 = pen2;
+                        
+                        let pen3 = Scene.vars.pen1.clone();
+                        pen3.position.x = 60;
+                        pen3.rotation.y = -Math.PI/4;
+                        Scene.vars.pen3 = pen3;
 
-                    //PEN CUP
-                    let penCup = new THREE.Group();
-                    penCup.add(Scene.vars.mug);
-                    penCup.add(Scene.vars.pen1);
-                    penCup.add(pen2);
-                    penCup.add(pen3);
-                    vars.scene.add(penCup);
-        
-                    penCup.position.z = 0;
-                    penCup.position.y = 0;
-                    Scene.vars.penCupGroup = penCup;
-
-                    //LAMP
-                    let lampDesk = new THREE.Group();
-                    lampDesk.add(Scene.vars.lamp);
-                    vars.scene.add(lampDesk);
-                    
-                    lampDesk.position.z = 50;
-                    lampDesk.position.y = 50;
-                    Scene.vars.lampDeskGroup = lampDesk;
-                    
-                    console.log("== finish loading ==");
-                    document.querySelector('#loading').remove();
+                        let penNote = Scene.vars.pen1.clone();
+                        
+                        penNote.rotation.y = -Math.PI/2;
+                        penNote.position.z = -150;
+                        penNote.position.y = 50;
+                       
+    
+                        //PEN CUP
+                        let penCup = new THREE.Group();
+                        penCup.add(Scene.vars.mug);
+                        penCup.add(Scene.vars.pen1);
+                        penCup.add(pen2);
+                        penCup.add(pen3);
+                        vars.scene.add(penCup);
+            
+                        penCup.position.x = -500;
+                        penCup.position.y = 0;
+                        penCup.position.z = -350;
+                        Scene.vars.penCupGroup = penCup;
+    
+                        //LAMP
+                        vars.scene.add(Scene.vars.lamp);
+                             
+                        //NOTE
+                        vars.scene.add(penNote);
+                        vars.scene.add(Scene.vars.notepad);
+                        
+                        console.log("== finish loading ==");
+                        document.querySelector('#loading').remove();
+    
+                    });
                 });
             });
         });
+        
+
+        //Ajout animation
+        window.addEventListener('mousedown', Scene.onMouseDown, false);
 
     },
     onWindowResize: () => {
@@ -188,6 +203,39 @@ const Scene = {
     animate: () => {
         requestAnimationFrame(Scene.animate);
         Scene.render();
+    },
+    onMouseDown: (event) => {
+        Scene.vars.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        Scene.vars.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1; 
+
+        Scene.vars.raycaster.setFromCamera(Scene.vars.mouse, Scene.vars.camera);
+
+        if (Scene.vars.lamp !== undefined) {
+            let mouse = new THREE.Vector3(Scene.vars.mouse.x, Scene.vars.mouse.y, 0);
+			mouse.unproject(Scene.vars.camera);
+
+			let ray = new THREE.Raycaster(Scene.vars.camera.position, mouse.sub(Scene.vars.camera.position).normalize()); 
+            
+            let intersects = ray.intersectObjects(Scene.vars.lamp.children, true);
+			if(intersects.length > 0) {
+                if(Scene.vars.scene.children[2].intensity === 0){
+                    Scene.vars.scene.children[2].intensity = 1;
+                }
+                else if(Scene.vars.scene.children[2].intensity === 1){
+                    Scene.vars.scene.children[2].intensity = 2;
+                }
+                else if(Scene.vars.scene.children[2].intensity === 2){
+                    Scene.vars.scene.children[2].intensity = 3;
+                }
+                else if(Scene.vars.scene.children[2].intensity === 3){
+                    Scene.vars.scene.children[2].intensity = 0;
+                }
+                
+                // var arrow = new THREE.ArrowHelper(ray.ray.direction, ray.ray.origin, 1000, 0xFF00000);
+				// Scene.vars.scene.add(arrow);
+			}
+        }
+
     },
     loadFBX: (file, scale, position, rotation, color, name, callback) => {
         let loader = new FBXLoader();
