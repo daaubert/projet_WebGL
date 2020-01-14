@@ -16,7 +16,9 @@ const Scene = {
         raycaster: new THREE.Raycaster(),
         animSpeed: 0,
         animPercent: 0.00,
-        lightLamp: null
+        lightLamp: null,
+        listener: null,
+        sound: null
     },
     init: () => {
         console.log("== init ==");
@@ -188,6 +190,7 @@ const Scene = {
                             vars.scene.add(penNote);
                             vars.scene.add(Scene.vars.notepad);
                             
+                            Scene.loadAudio("./sounds/swCantina.mp3", true);
                             console.log("== finish loading ==");
                             document.querySelector('#loading').remove();
                         });
@@ -199,6 +202,13 @@ const Scene = {
         //Ajout animation
         window.addEventListener('mousedown', Scene.onMouseDown, false);
         window.addEventListener('mousemove', Scene.onMouseMove, false);
+
+        //Ajout sons
+        vars.listener = new THREE.AudioListener();
+        vars.camera.add(vars.listener);
+ 
+        vars.sound = new THREE.Audio(vars.listener);
+
 
     },
     onWindowResize: () => {
@@ -300,10 +310,19 @@ const Scene = {
             let intersectsPenNote = ray.intersectObjects(Scene.vars.penNote.children, true);
 			if(intersectsPenNote.length > 0) {
                 Scene.vars.animPercent = 0;
+                Scene.vars.animSpeed = 0.05;
                 Scene.animationPen();
+            }
 
-                Scene.vars.penNote.rotation.y = -Math.PI/2;
-                Scene.vars.penNote.position.set(0, 25, -20);
+            //Sons radio
+            let intersectsRadio = ray.intersectObjects(Scene.vars.radio.children, true);
+            if(intersectsRadio.length > 0){
+                if(!Scene.vars.sound.isPlaying){
+                    Scene.vars.sound.play();
+                }
+                else if(Scene.vars.sound.isPlaying){
+                    Scene.vars.sound.pause();
+                }
             }
             
         }
@@ -354,23 +373,13 @@ const Scene = {
         });
     },
     loadAudio: (file, infini) => {
-        /**
-         * Play sound
-         */
-        // create an AudioListener and add it to the camera
-        var listener = new THREE.AudioListener();
-        Scene.vars.camera.add(listener);
-
-        // create a global audio source
-        var sound = new THREE.Audio(listener);
-
-        // load a sound and set it as the Audio object's buffer
         var audioLoader = new THREE.AudioLoader();
         audioLoader.load(file, function (buffer) {
-            sound.setBuffer(buffer);
-            sound.setLoop(infini);
-            sound.setVolume(0.5);
-            sound.play();
+            console.log("passsage audio");
+            Scene.vars.sound.setBuffer(buffer);
+            Scene.vars.sound.setLoop(infini);
+            Scene.vars.sound.setVolume(0.5);
+           
         });
     },
 
