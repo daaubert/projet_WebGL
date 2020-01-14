@@ -73,7 +73,7 @@ const Scene = {
 
 
        vars.lightLamp = new THREE.SpotLight(0xF0BB2C, 0, 0, Math.PI/4);
-       vars.lightLamp.position.set(350, 700, -450);
+       vars.lightLamp.position.set(350, 700, -250);
 
        vars.lightLamp.castShadow = true;
        vars.lightLamp.shadow.camera.left = -d;
@@ -138,59 +138,67 @@ const Scene = {
 
 
         //Chargement des objets
-        Scene.loadFBX("./models/clipboard.FBX", 60, [0, 100, 850], [0, 0, 0], 0xFFFFFF, "notepad", () => {
-            Scene.loadFBX("./models/lamp/lamp.FBX", 1.5, [500, 0, -700], [0, Math.PI/4, 0], 0xFFFF00, "lamp", () => {
-                Scene.loadFBX("./models/mug.FBX", 1.25, [-260, 2, -200], [0, 0, 0], 0xFEB900, "mug", () => {
-                    Scene.loadFBX("./models/pen.FBX", 1, [0, 250, 0], [Math.PI/2, 0, 0], 0xFFFF00, "pen1", () => {
-                        //Clonage
-                        let pen2 = Scene.vars.pen1.clone();
-                        pen2.position.x = -60;
-                        pen2.rotation.y = Math.PI/4;
-                        Scene.vars.pen2 = pen2;
-                        
-                        let pen3 = Scene.vars.pen1.clone();
-                        pen3.position.x = 60;
-                        pen3.rotation.y = -Math.PI/4;
-                        Scene.vars.pen3 = pen3;
+        Scene.loadFBX("./models/radio/radio.FBX", 1, [-500, 110, -500], [0, -Math.PI/3, 0], null, "radio", () => {
+            Scene.loadFBX("./models/clipboard.FBX", 60, [0, 100, 850], [0, 0, 0], 0xFFFFFF, "notepad", () => {
+                Scene.loadFBX("./models/lamp/lamp.FBX", 1.5, [500, 0, -500], [0, Math.PI/4, 0], 0xFFFF00, "lamp", () => {
+                    Scene.loadFBX("./models/mug.FBX", 1.25, [-260, 2, -200], [0, 0, 0], 0xFEB900, "mug", () => {
+                        Scene.loadFBX("./models/pen.FBX", 1, [0, 250, 0], [Math.PI/2, 0, 0], 0xFFFF00, "pen1", () => {
+                            
+                            //Clonage
+                            let pen2 = Scene.vars.pen1.clone();
+                            pen2.position.x = -60;
+                            pen2.rotation.y = Math.PI/4;
+                            Scene.vars.pen2 = pen2;
+                            
+                            let pen3 = Scene.vars.pen1.clone();
+                            pen3.position.x = 60;
+                            pen3.rotation.y = -Math.PI/4;
+                            Scene.vars.pen3 = pen3;
+    
+                            let penNote = Scene.vars.pen1.clone();
+                            
+                            penNote.rotation.x = 0;
+                            penNote.rotation.y = 0;
+                            penNote.position.x = 400;
+                            penNote.position.y = 0;
+                            penNote.position.z = 500;
+                            
+                            
+                            //PEN CUP
+                            let penCup = new THREE.Group();
+                            penCup.add(Scene.vars.mug);
+                            penCup.add(Scene.vars.pen1);
+                            penCup.add(pen2);
+                            penCup.add(pen3);
+                            vars.scene.add(penCup);
+                
+                            penCup.position.x = -700;
+                            penCup.position.y = 0;
+                            penCup.position.z = 150;
+                            Scene.vars.penCupGroup = penCup;
+        
+                            //RADIO
+                            vars.scene.add(Scene.vars.radio);
 
-                        let penNote = Scene.vars.pen1.clone();
-                        
-                        penNote.rotation.y = -Math.PI/2;
-                        penNote.position.z = -20;
-                        penNote.position.y = 25;
-                        
-                        //PEN CUP
-                        let penCup = new THREE.Group();
-                        penCup.add(Scene.vars.mug);
-                        penCup.add(Scene.vars.pen1);
-                        penCup.add(pen2);
-                        penCup.add(pen3);
-                        vars.scene.add(penCup);
-            
-                        penCup.position.x = -500;
-                        penCup.position.y = 0;
-                        penCup.position.z = -350;
-                        Scene.vars.penCupGroup = penCup;
-    
-                        //LAMP
-                        vars.scene.add(Scene.vars.lamp);
-                             
-                        //NOTE
-                        Scene.vars.penNote = penNote;
-                        vars.scene.add(penNote);
-                        vars.scene.add(Scene.vars.notepad);
-                        
-                        console.log("== finish loading ==");
-                        document.querySelector('#loading').remove();
-    
+                            //LAMP
+                            vars.scene.add(Scene.vars.lamp);
+                                
+                            //NOTE
+                            Scene.vars.penNote = penNote;
+                            vars.scene.add(penNote);
+                            vars.scene.add(Scene.vars.notepad);
+                            
+                            console.log("== finish loading ==");
+                            document.querySelector('#loading').remove();
+                        });
                     });
                 });
             });
         });
-        
 
         //Ajout animation
         window.addEventListener('mousedown', Scene.onMouseDown, false);
+        window.addEventListener('mousemove', Scene.onMouseMove, false);
 
     },
     onWindowResize: () => {
@@ -206,7 +214,53 @@ const Scene = {
     },
     animate: () => {
         requestAnimationFrame(Scene.animate);
+
+        Scene.vars.raycaster.setFromCamera(Scene.vars.mouse, Scene.vars.camera);
+        if (Scene.vars.penCupGroup !== undefined) {
+           
+            let intersects = Scene.vars.raycaster.intersectObjects(Scene.vars.penCupGroup.children, true);
+
+            if (intersects.length > 0) {
+                Scene.vars.animSpeed = 0.05;
+            }
+            else{
+                Scene.vars.animSpeed = -0.05;
+            }
+            Scene.customAnimation();
+        }
+
         Scene.render();
+    },
+    customAnimation: () => {
+        let vars = Scene.vars;
+
+		if (vars.animSpeed === null) {
+			return;
+		}
+
+        vars.animPercent += vars.animSpeed;
+        
+		if (vars.animPercent < 0) {
+			vars.animPercent = 0;
+		}
+		if (vars.animPercent > 1) {
+			vars.animPercent = 1;
+        }
+
+        if (vars.animPercent > 0 && vars.animPercent < 1) {
+			vars.pen1.position.y = 250 + (vars.animPercent * 200);
+		} else if (vars.animPercent >= 1) {
+			vars.pen1.position.y = 250 + 200;
+        }
+        else if (vars.animPercent <= 0) {
+			vars.pen1.position.y = 250;
+		}
+        
+
+    },
+    onMouseMove: (event) => {
+        Scene.vars.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        Scene.vars.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     },
     onMouseDown: (event) => {
         Scene.vars.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -282,8 +336,10 @@ const Scene = {
                 if(node.isMesh) {
                     node.receiveShadow = true;
                     node.castShadow = true;
-
-                    node.material.color = new THREE.Color(color);
+                    if(color !== null){
+                        node.material.color = new THREE.Color(color);
+                    }
+                    
                 }
             });
 
@@ -296,7 +352,28 @@ const Scene = {
             callback();
 
         });
-    }
+    },
+    loadAudio: (file, infini) => {
+        /**
+         * Play sound
+         */
+        // create an AudioListener and add it to the camera
+        var listener = new THREE.AudioListener();
+        Scene.vars.camera.add(listener);
+
+        // create a global audio source
+        var sound = new THREE.Audio(listener);
+
+        // load a sound and set it as the Audio object's buffer
+        var audioLoader = new THREE.AudioLoader();
+        audioLoader.load(file, function (buffer) {
+            sound.setBuffer(buffer);
+            sound.setLoop(infini);
+            sound.setVolume(0.5);
+            sound.play();
+        });
+    },
+
 };
 
 Scene.init(); 
