@@ -56,7 +56,7 @@ const Scene = {
         let d = 1000;
 
         vars.lightLamp = new THREE.SpotLight(0xF0BB2C, 0, 0, Math.PI / 4);
-        vars.lightLamp.position.set(350, 700, -250);
+        vars.lightLamp.position.set(370, 700, -160);
 
         vars.lightLamp.castShadow = true;
         vars.lightLamp.shadow.camera.left = -d;
@@ -124,7 +124,7 @@ const Scene = {
         //Chargement des objets
         Scene.loadFBX("./models/radio/radio.FBX", 1, [-500, 110, -500], [0, -Math.PI / 3, 0], null, "radio", () => {
             Scene.loadFBX("./models/clipboard.FBX", 60, [0, 100, 850], [0, 0, 0], 0xFFFFFF, "notepad", () => {
-                Scene.loadFBX("./models/lamp/lamp.FBX", 1.5, [500, 0, -500], [0, Math.PI / 4, 0], 0xF52323, "lamp", () => {
+                Scene.loadFBX("./models/lamp/lamp.FBX", 1.5, [520, 0, -410], [0, Math.PI / 4, 0], 0xF52323, "lamp", () => {
                     Scene.loadFBX("./models/mug.FBX", 1.25, [-260, 2, -200], [0, 0, 0], 0xFEB900, "mug", () => {
                         Scene.loadFBX("./models/pen.FBX", 1, [0, 250, 0], [Math.PI / 2, 0, 0], 0xFFFF00, "pen1", () => {
                             Scene.loadFBX("./models/eraser.FBX", 40, [500, -20, 200], [0, -Math.PI / 3, 0], 0xFFFF00, "eraser", () => {
