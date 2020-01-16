@@ -116,9 +116,6 @@ const Scene = {
         vars.controls.minPolarAngle = -Math.PI / 2;
         vars.controls.maxPolarAngle = Math.PI / 2;
 
-        // vars.controls.maxAzimuthAngle = Math.PI / 4;
-        // vars.controls.minAzimuthAngle = -Math.PI / 4;
-
         vars.controls.minDistance = 300;
         vars.controls.maxDistance = 3000;
         //vars.controls.autoRotate = true;
@@ -171,8 +168,6 @@ const Scene = {
                                                             penCup.position.z = 150;
                                                             Scene.vars.penCupGroup = penCup;
 
-
-
                                                             //NOTE
                                                             Scene.vars.penNote = penNote;
                                                             vars.scene.add(penNote);
@@ -186,8 +181,6 @@ const Scene = {
                                                             vars.scene.add(Scene.vars.eraser);
                                                             vars.scene.add(Scene.vars.fish);
                                                             vars.scene.add(Scene.vars.texteStop);
-
-
 
                                                             console.log("== finish loading ==");
                                                             document.querySelector('#loading').remove();
@@ -276,9 +269,6 @@ const Scene = {
         Scene.vars.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     },
     onMouseDown: (event) => {
-        Scene.vars.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        Scene.vars.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
         Scene.vars.raycaster.setFromCamera(Scene.vars.mouse, Scene.vars.camera);
 
         if (Scene.vars.lamp !== undefined && Scene.vars.penNote !== undefined
@@ -356,22 +346,23 @@ const Scene = {
 
     },
     animationPen: () => {
-        while (Scene.vars.animPercent <= 1) {
+        //Toujours la tentative ratée
+    //     while (Scene.vars.animPercent <= 1) {
 
-            if (Scene.vars.penNote.position.y < 300) {
-                Scene.vars.penNote.position.y += 1;
-            }
-            else if (Scene.vars.penNote.rotation.y !== 0) {
-                Scene.vars.penNote.rotation.y = 0;
-                Scene.vars.penNote.position.x = -100;
-                Scene.vars.penNote.position.z = 100;
-                Scene.vars.penNote.position.x = 500;
-            }
+    //         if (Scene.vars.penNote.position.y < 300) {
+    //             Scene.vars.penNote.position.y += 1;
+    //         }
+    //         else if (Scene.vars.penNote.rotation.y !== 0) {
+    //             Scene.vars.penNote.rotation.y = 0;
+    //             Scene.vars.penNote.position.x = -100;
+    //             Scene.vars.penNote.position.z = 100;
+    //             Scene.vars.penNote.position.x = 500;
+    //         }
 
 
-            console.log(Scene.vars.animPercent)
-            Scene.vars.animPercent += 0.0005;
-        }
+    //         console.log(Scene.vars.animPercent)
+    //         Scene.vars.animPercent += 0.0005;
+    //     }
 
     },
     loadFBX: (file, scale, position, rotation, color, name, callback) => {
@@ -385,7 +376,6 @@ const Scene = {
                     if (color !== null) {
                         node.material.color = new THREE.Color(color);
                     }
-
                 }
             });
 
@@ -441,13 +431,8 @@ const Scene = {
             let mesh = new THREE.Mesh(geometry, material);
 
 
-            mesh.position.x = position[0];
-            mesh.position.y = position[1];
-            mesh.position.z = position[2];
-
-            mesh.rotation.x = rotation[0];
-            mesh.rotation.y = rotation[1];
-            mesh.rotation.z = rotation[2];
+            mesh.position.set(position[0],position[1],position[2]);
+            mesh.rotation.set(rotation[0],rotation[1],rotation[2]);
 
             mesh.scale.x = mesh.scale.y = mesh.scale.z = scale;
 
