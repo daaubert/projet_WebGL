@@ -31,7 +31,7 @@ const Scene = {
 
         // Création de la scene
         vars.scene = new THREE.Scene();
-        vars.scene.background = new THREE.Color(0xa0a0a0);
+        vars.scene.background = new THREE.Color(0xFAFFC6);
 
         // Moteur de rendus
         vars.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -45,11 +45,11 @@ const Scene = {
 
         // Création de la caméra
         vars.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 5000);
-        vars.camera.position.set(-1.5, 2053, 2075);
+        vars.camera.position.set(-1.5, 1800, 2075);
 
 
         // Création de la lumière
-        let lightGlobal = new THREE.HemisphereLight(0xFFFFFF, 0x444444, 0.5);
+        let lightGlobal = new THREE.HemisphereLight(0xFFFFFF, 0x444444, 0.75);
         lightGlobal.position.set(0, 700, 0);
         vars.scene.add(lightGlobal);
 
@@ -74,12 +74,16 @@ const Scene = {
         vars.scene.add(vars.lightLamp);
 
 
-        let helperLamp = new THREE.SpotLightHelper(vars.lightLamp, 5);
+        //let helperLamp = new THREE.SpotLightHelper(vars.lightLamp, 5);
         //vars.scene.add(helperLamp);
 
 
         // Création du sol
-        let sol = new THREE.Mesh(new THREE.PlaneBufferGeometry(2000, 2000), new THREE.MeshLambertMaterial({ color: new THREE.Color(0x888888), map: new THREE.TextureLoader().load('./texture/wood.jpg') }));
+        var groundTexture = new THREE.TextureLoader().load( './texture/wood.jpg' );
+        groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
+        var groundMaterial = new THREE.MeshLambertMaterial( { map: groundTexture } );
+
+        let sol = new THREE.Mesh(new THREE.PlaneBufferGeometry(3000, 2000), groundMaterial );
         sol.rotation.x = -Math.PI / 2;
         sol.receiveShadow = false;
         vars.scene.add(sol);
@@ -92,10 +96,10 @@ const Scene = {
         vars.scene.add(shadowPlane);
 
         // Grid helper
-        let grid = new THREE.GridHelper(2000, 20, 0x000000, 0x000000);
-        grid.material.opacity = 0.2;
-        grid.material.transparent = true;
-        vars.scene.add(grid);
+        // let grid = new THREE.GridHelper(2000, 20, 0x000000, 0x000000);
+        // grid.material.opacity = 0.2;
+        // grid.material.transparent = true;
+        // vars.scene.add(grid);
 
         // Gestion redimensionnement fenetre
         window.addEventListener('resize', Scene.onWindowResize, false);
@@ -109,8 +113,8 @@ const Scene = {
         vars.controls.target.set(0, 100, 0);
         vars.controls.enablePan = false;
 
-        // vars.controls.minPolarAngle = -Math.PI / 2;
-        // vars.controls.maxPolarAngle = Math.PI / 2;
+        vars.controls.minPolarAngle = -Math.PI / 2;
+        vars.controls.maxPolarAngle = Math.PI / 2;
 
         // vars.controls.maxAzimuthAngle = Math.PI / 4;
         // vars.controls.minAzimuthAngle = -Math.PI / 4;
@@ -123,61 +127,72 @@ const Scene = {
         //Chargement des objets
         Scene.loadFBX("./models/radio/radio.FBX", 1, [-500, 110, -500], [0, -Math.PI / 3, 0], null, "radio", () => {
             Scene.loadFBX("./models/clipboard.FBX", 60, [0, 100, 850], [0, 0, 0], 0xFFFFFF, "notepad", () => {
-                Scene.loadFBX("./models/lamp/lamp.FBX", 1.5, [500, 0, -500], [0, Math.PI / 4, 0], 0xD50000, "lamp", () => {
+                Scene.loadFBX("./models/lamp/lamp.FBX", 1.5, [500, 0, -500], [0, Math.PI / 4, 0], 0xF52323, "lamp", () => {
                     Scene.loadFBX("./models/mug.FBX", 1.25, [-260, 2, -200], [0, 0, 0], 0xFEB900, "mug", () => {
                         Scene.loadFBX("./models/pen.FBX", 1, [0, 250, 0], [Math.PI / 2, 0, 0], 0xFFFF00, "pen1", () => {
                             Scene.loadFBX("./models/eraser.FBX", 40, [500, -20, 200], [0, -Math.PI / 3, 0], 0xFFFF00, "eraser", () => {
-                                Scene.loadAudio("./sounds/swCantina.mp3", true, () => {
-                                    Scene.loadAudio("./sounds/dbzOP.mp3", true, () => {
-                                        Scene.loadAudio("./sounds/theWitcher.mp3", true, () => {
-                                            Scene.loadAudio("./sounds/zeldaTheme.mp3", true, () => {
-                                                Scene.loadText("Au moins\n 16/20 stp :'(", 5, [0, 35, 450], [-Math.PI/2, 0, 0], 0x1A1A1A, "texte", () => {
-                                                    //Clonage
-                                                    let pen2 = Scene.vars.pen1.clone();
-                                                    pen2.position.x = -60;
-                                                    pen2.rotation.y = Math.PI / 4;
-                                                    Scene.vars.pen2 = pen2;
+                                Scene.loadFBX("./models/fishFBX/fishFBX.FBX", 30, [-470, 400, -1450], [0, 0, 0], null, "fish", () => {
+                                    Scene.loadAudio("./sounds/swCantina.mp3", true, () => {
+                                        Scene.loadAudio("./sounds/dbzOP.mp3", true, () => {
+                                            Scene.loadAudio("./sounds/theWitcher.mp3", true, () => {
+                                                Scene.loadAudio("./sounds/zeldaTheme.mp3", true, () => {
+                                                    Scene.loadText("Ce serait \nbien d'avoir \nau moins \n15/20 stp :'(", 5, [0, 35, 470], [-Math.PI / 2, 0, 0], 0x1A1A1A, "texte", () => {
+                                                        Scene.loadText("STOP", 5, [-550, 100, -570], [0, 7 * Math.PI / 6, 0], 0xFF0000, "texteStop", () => {
+                                                            //Clonage
+                                                            let pen2 = Scene.vars.pen1.clone();
+                                                            pen2.position.x = -60;
+                                                            pen2.rotation.y = Math.PI / 4;
+                                                            Scene.vars.pen2 = pen2;
 
-                                                    let pen3 = Scene.vars.pen1.clone();
-                                                    pen3.position.x = 60;
-                                                    pen3.rotation.y = -Math.PI / 4;
-                                                    Scene.vars.pen3 = pen3;
+                                                            let pen3 = Scene.vars.pen1.clone();
+                                                            pen3.position.x = 60;
+                                                            pen3.rotation.y = -Math.PI / 4;
+                                                            Scene.vars.pen3 = pen3;
 
-                                                    let penNote = Scene.vars.pen1.clone();
+                                                            let penNote = Scene.vars.pen1.clone();
 
-                                                    penNote.rotation.x = 0;
-                                                    penNote.rotation.y = 0;
-                                                    penNote.position.x = 400;
-                                                    penNote.position.y = 0;
-                                                    penNote.position.z = 500;
+                                                            penNote.rotation.x = 0;
+                                                            penNote.rotation.y = 0;
+                                                            penNote.position.x = 400;
+                                                            penNote.position.y = 0;
+                                                            penNote.position.z = 500;
 
 
-                                                    //PEN CUP
-                                                    let penCup = new THREE.Group();
-                                                    penCup.add(Scene.vars.mug);
-                                                    penCup.add(Scene.vars.pen1);
-                                                    penCup.add(pen2);
-                                                    penCup.add(pen3);
-                                                    vars.scene.add(penCup);
+                                                            //PEN CUP
+                                                            let penCup = new THREE.Group();
+                                                            penCup.add(Scene.vars.mug);
+                                                            penCup.add(Scene.vars.pen1);
+                                                            penCup.add(pen2);
+                                                            penCup.add(pen3);
+                                                            vars.scene.add(penCup);
 
-                                                    penCup.position.x = -700;
-                                                    penCup.position.y = 0;
-                                                    penCup.position.z = 150;
-                                                    Scene.vars.penCupGroup = penCup;
+                                                            penCup.position.x = -700;
+                                                            penCup.position.y = 0;
+                                                            penCup.position.z = 150;
+                                                            Scene.vars.penCupGroup = penCup;
 
-                                                    //NO GROUP
-                                                    vars.scene.add(Scene.vars.radio);
-                                                    vars.scene.add(Scene.vars.lamp);
-                                                    vars.scene.add(Scene.vars.texte);
-                                                    vars.scene.add(Scene.vars.eraser);
 
-                                                    //NOTE
-                                                    Scene.vars.penNote = penNote;
-                                                    vars.scene.add(penNote);
-                                                    vars.scene.add(Scene.vars.notepad);
 
-                                                    console.log("== finish loading ==");
-                                                    document.querySelector('#loading').remove();
+                                                            //NOTE
+                                                            Scene.vars.penNote = penNote;
+                                                            vars.scene.add(penNote);
+                                                            vars.scene.add(Scene.vars.notepad);
+
+                                                            //NO GROUP
+                                                            vars.scene.add(Scene.vars.radio);
+                                                            vars.scene.add(Scene.vars.lamp);
+                                                            Scene.vars.texte.visible = false;
+                                                            vars.scene.add(Scene.vars.texte);
+                                                            vars.scene.add(Scene.vars.eraser);
+                                                            vars.scene.add(Scene.vars.fish);
+                                                            vars.scene.add(Scene.vars.texteStop);
+
+
+
+                                                            console.log("== finish loading ==");
+                                                            document.querySelector('#loading').remove();
+                                                        });
+                                                    });
                                                 });
                                             });
                                         });
@@ -259,7 +274,6 @@ const Scene = {
     onMouseMove: (event) => {
         Scene.vars.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         Scene.vars.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        // console.log(Scene.vars.camera.position);
     },
     onMouseDown: (event) => {
         Scene.vars.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -267,8 +281,10 @@ const Scene = {
 
         Scene.vars.raycaster.setFromCamera(Scene.vars.mouse, Scene.vars.camera);
 
-        if (Scene.vars.lamp !== undefined && Scene.vars.penNote !== undefined 
-            && Scene.vars.radio !== undefined  && Scene.vars.eraser !== undefined) {
+        if (Scene.vars.lamp !== undefined && Scene.vars.penNote !== undefined
+            && Scene.vars.radio !== undefined && Scene.vars.eraser !== undefined
+            && Scene.vars.fish !== undefined) {
+
             let mouse = new THREE.Vector3(Scene.vars.mouse.x, Scene.vars.mouse.y, 0);
             mouse.unproject(Scene.vars.camera);
 
@@ -329,6 +345,11 @@ const Scene = {
                     }
 
                 }
+            }
+
+            let intersectsStopRadio = ray.intersectObjects([Scene.vars.fish], true);
+            if (intersectsStopRadio.length > 0) {
+                Scene.vars.sounds[Scene.vars.soundIndex].pause();
             }
 
         }
@@ -400,7 +421,7 @@ const Scene = {
         }
 
         loader.load('./vendor/three.js-master/examples/fonts/helvetiker_regular.typeface.json', (font) => {
-           
+
             let geometry = new THREE.TextGeometry(text, {
                 font,
                 size: 10,
@@ -419,7 +440,7 @@ const Scene = {
 
             let mesh = new THREE.Mesh(geometry, material);
 
-            mesh.visible = false;
+
             mesh.position.x = position[0];
             mesh.position.y = position[1];
             mesh.position.z = position[2];
